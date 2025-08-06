@@ -3,3 +3,8 @@ plotly
 pandas
 numpy
 yfinance
+os
+time
+datetime
+math
+scipy
