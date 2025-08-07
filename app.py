@@ -236,14 +236,16 @@ def render_equity_terminal():
 
     # ---------------- BALANCE 10-K / 10-Q ----------------
 
-    left, center, right = st.columns([1, 10, 1])
-    with center:
-        with st.spinner("📥 Descargando y procesando balance desde SEC..."):
-            balance_path = fetch_balance_path(ticker)
-        st.subheader("📑 Último balance financiero (10-K)")
-        with open(balance_path, "r", encoding="utf-8") as f:
-            html = f.read()
-        st.components.v1.html(html, height=600, scrolling=True)
+    with st.spinner("📥 Descargando y procesando balance desde SEC..."):
+        balance_path = fetch_balance_path(ticker)
+    st.subheader("📑 Último balance financiero (10-K)")
+    with open(balance_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    st.components.v1.html(f"""
+        <div style="width: 60%; margin: auto;">
+            {html}
+        </div>
+        """, height=600, scrolling=True)
 
     
 
