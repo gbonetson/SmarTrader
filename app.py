@@ -242,7 +242,7 @@ def render_equity_terminal():
     with open(balance_path, "r", encoding="utf-8") as f:
         html = f.read()
     st.components.v1.html(f"""
-        <div style="width: 60%; margin: auto;">
+        <div style="width: 60% !important; margin: auto;">
             {html}
         </div>
         """, height=600, scrolling=True)
