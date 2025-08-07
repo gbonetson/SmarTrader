@@ -238,14 +238,17 @@ def render_equity_terminal():
 
     with st.spinner("📥 Descargando y procesando balance desde SEC..."):
         balance_path = fetch_balance_path(ticker)
+
     st.subheader("📑 Último balance financiero (10-K)")
-    with open(balance_path, "r", encoding="utf-8") as f:
-        html = f.read()
-    st.components.v1.html(f"""
-        <div style="width: 60% !important; margin: auto;">
-            {html}
-        </div>
-        """, height=600, scrolling=True)
+
+    with open(balance_path, "rb") as f:
+        st.download_button(
+            label="🔍 Abrir balance en nueva pestaña",
+            data=f,
+            file_name="balance.html",
+            mime="text/html"
+        )
+
 
     
 
