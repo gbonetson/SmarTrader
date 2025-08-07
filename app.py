@@ -126,7 +126,7 @@ def render_equity_terminal():
         st.write(f"**Market Cap:** {info['market_cap']:,}" if info['market_cap'] else "N/A")
         st.write(f"**P/E Ratio:** {info['pe_ratio']}")
         st.write(f"**P/B Ratio:** {info['pb_ratio']}")
-        st.write(f"**Dividend Yield:** {round(info['dividend_yield'] * 100, 2)}%" if info['dividend_yield'] else "N/A")
+        st.write(f"**Dividend Yield:** {round(info['dividend_yield'], 2)}%" if info['dividend_yield'] else "N/A")
 
         st.markdown("---")
         st.write(info["description"][:500] + "...")
