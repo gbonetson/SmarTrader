@@ -7,122 +7,10 @@ import time
 from balance_sheet import extract_filings
 from options_app import render_options_workstation
 
-
-# ---------------- CONFIGURACIÓN ----------------
-# ---------- ESTILOS ----------
-st.markdown(
-    """
-    <style>
-    /* --- HEADER TICKERS --- */
-    .ticker-container {
-        position: relative;
-        top: 0;
-        z-index: 100;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding: 4px;
-        background-color: #0e1117;
-        border-bottom: 1px solid #333;
-        margin-bottom: 0px !important;
-    }
-
-    .ticker-box {
-        background-color: #1e1e1e;
-        color: white;
-        font-family: sans-serif;
-        padding: 10px 14px;
-        margin: 0 6px;
-        border-radius: 8px;
-        min-width: 140px;
-        text-align: center;
-        box-shadow: 0 0 5px rgba(255,255,255,0.05);
-    }
-
-    .ticker-title {
-        font-weight: bold;
-        font-size: 14px;
-        color: #dcdcdc;
-    }
-
-    .ticker-price {
-        font-size: 20px;
-        margin: 2px 0;
-    }
-
-    .positive {
-        color: #00ff80;
-    }
-
-    .negative {
-        color: #ff4444;
-    }
-
-    /* --- REMOVE TOP PADDING of STREAMLIT MAIN CONTENT --- */
-    .block-container {
-        padding-top: 0rem !important;
-        margin-right: 20px !important;
-        padding-right: 20px !important;
-        margin-left: 20px !important;
-        padding-left: 20px !important;
-    }
-
-    /* Opcional: achica padding de abajo del header */
-    header {
-        margin-bottom: 0px !important;
-        padding-bottom: 0px !important;
-        margin-right: 0px !important;
-        padding-right: 0px !important;
-        margin-left: 0px !important;
-        padding-left: 0px !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# ---------- TICKERS ----------
-tickers = {
-    "S&P 500": "^GSPC",
-    "Dow 30": "^DJI",
-    "Nasdaq": "^IXIC",
-    "Russell 2000": "^RUT",
-    "VIX": "^VIX",
-    "Gold": "GC=F",
-    "Oil": "CL=F",
-    "BTC/USD": "BTC-USD",
-}
-
-# ---------- HTML Dinámico ----------
-boxes = []
-
-for name, symbol in tickers.items():
-    data = yf.Ticker(symbol).history(period="2d", interval="1d")
-    if data.empty or len(data) < 2:
-        continue
-    prev = data["Close"].iloc[-2]
-    now = data["Close"].iloc[-1]
-    change = now - prev
-    pct = (change / prev) * 100
-    cls = "positive" if change >= 0 else "negative"
-    sign = "+" if change >= 0 else ""
-    box = (
-        f"<div class='ticker-box'>"
-        f"<div class='ticker-title'>{name}</div>"
-        f"<div class='ticker-price'>{now:,.2f}</div>"
-        f"<div class='{cls}'>{sign}{change:.2f}</div>"
-        f"<div class='{cls}'>({sign}{pct:.2f}%)</div>"
-        f"</div>"
-    )
-    boxes.append(box)
-
 # ---------- RENDER ----------
-st.markdown(f"<div class='ticker-container'>{''.join(boxes)}</div>", unsafe_allow_html=True)
 st.set_page_config(layout="wide", page_title="SmarTrader")
 
-st.markdown("<h1 style='text-align: center;'>The SmarTrader terminal</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; padding-top: 0;'>The SmarTrader terminal</h1>", unsafe_allow_html=True)
 
 # ---------------- SIDEBAR ----------------
 st.sidebar.title("SmarTrader")
@@ -348,12 +236,14 @@ def render_equity_terminal():
 
     # ---------------- BALANCE 10-K / 10-Q ----------------
 
-    with st.spinner("📥 Descargando y procesando balance desde SEC..."):
-        balance_path = fetch_balance_path(ticker)
-    st.subheader("📑 Último balance financiero (10-K)")
-    with open(balance_path, "r", encoding="utf-8") as f:
-        html = f.read()
-    st.components.v1.html(html, height=600, scrolling=True)
+    left, center, right = st.columns([1, 10, 1])
+    with center:
+        with st.spinner("📥 Descargando y procesando balance desde SEC..."):
+            balance_path = fetch_balance_path(ticker)
+        st.subheader("📑 Último balance financiero (10-K)")
+        with open(balance_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        st.components.v1.html(html, height=600, scrolling=True)
 
     
 
