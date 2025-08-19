@@ -32,13 +32,15 @@ def render_options_workstation():
     with col1:
         min_strike = st.selectbox("Rango de bases", sorted(strikes))
     with col2:
-        max_strike = st.selectbox(" ", sorted(strikes))
+        last_strike = strikes[-1]
+        last_strike_index = strikes.index(last_strike)
+        max_strike = st.selectbox(" ", sorted(strikes), index=last_strike_index)
 
     # Checkbox para mostrar precios teóricos Black-Scholes
     show_bs = st.checkbox("Mostrar precios Black-Scholes", value=False)
 
     if min_strike > max_strike:
-        st.write("no seas down")
+        st.write("La base máxima debe ser mayor a la base mínima")
     else:
         mult = strikes[1] - strikes[0]
         sub_strikes = []

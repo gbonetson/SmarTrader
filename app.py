@@ -6,6 +6,7 @@ import os
 import time
 from balance_sheet import extract_filings
 from options_app import render_options_workstation
+from trade_sim_app import TradeSIMS
 
 # ---------- RENDER ----------
 st.set_page_config(layout="wide", page_title="SmarTrader")
@@ -14,7 +15,7 @@ st.markdown("<h1 style='text-align: center; padding-top: 0;'>The SmarTrader term
 
 # ---------------- SIDEBAR ----------------
 st.sidebar.title("SmarTrader")
-tab = st.sidebar.radio("Navegación", ["Terminal", "Options Workstation"])
+tab = st.sidebar.radio("Navegación", ["Terminal", "Options Workstation","TradeSIM"])
 def render_equity_terminal():
     with st.sidebar:
         ticker = st.text_input("Ticker", value="AAPL").upper()
@@ -256,3 +257,5 @@ if tab == "Terminal":
     render_equity_terminal()
 if tab == "Options Workstation":
     render_options_workstation()
+if tab == "TradeSIM":
+    TradeSIMS()
