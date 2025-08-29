@@ -10,7 +10,14 @@ def render_options_workstation():
 
     ticker = st.text_input("Ticker", value="AAPL").upper()
 
-    expirations = fetch_option_exp(ticker)
+    expirations_tuple = fetch_option_exp(ticker)
+    expirations = list(expirations_tuple)
+    
+    current_date0 = datetime.today().date()
+
+    if str(expirations[0]) == str(current_date0):
+        expirations.remove(expirations[0])
+
     opt_type = st.radio("Tipo de contrato", ["Calls", "Puts"])
     exp_date = st.selectbox("Vencimiento", sorted(expirations))
     chain = fetch_option_chain(ticker, exp_date)
@@ -26,6 +33,7 @@ def render_options_workstation():
     spot = fetch_ticker_info(ticker)['price']
     exp_date_dt = datetime.strptime(exp_date, '%Y-%m-%d')
     current_date = datetime.today()
+
     T = ((exp_date_dt - current_date).days) / 365
 
     col1, col2 = st.columns([2, 2])

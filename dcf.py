@@ -15,35 +15,11 @@ def _get_json(url):
         raise FMPError(f"No pude parsear JSON de {url}: {e}")
 
 def _get_shares_outstanding(symbol, api_key):
-    # Intento principal: enterprise-values v3
-    url_ev = f"https://financialmodelingprep.com/api/v3/enterprise-values/{symbol}?limit=1&apikey={api_key}"
-    resp = requests.get(url_ev)
-    if resp.ok:
-        data = resp.json()
-        if isinstance(data, list) and data:
-            shares = data[0].get("numberOfShares")
-            if shares and shares > 0:
-                return int(shares)
 
-    # Fallbacks anteriores que ya habías incluido (profile, key-metrics, shares_float)
-    # ... (lo que ya tenías)
-    
-    raise FMPError("No pude obtener sharesOutstanding desde ningún endpoint de FMP.")
-
-
-    # 2) key-metrics (annual, 1 registro)
-    url = f"https://financialmodelingprep.com/api/v3/key-metrics/{symbol}?period=annual&limit=1&apikey={api_key}"
-    data = _get_json(url)
+    url_quote = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey={api_key}"
+    data = _get_json(url_quote)
     if isinstance(data, list) and data:
         so = data[0].get("sharesOutstanding")
-        if so and so > 0:
-            return int(so)
-
-    # 3) shares_float (v4) — tomar el más reciente si hay varios
-    url = f"https://financialmodelingprep.com/api/v3/enterprise-values/{symbol}?limit=1&apikey={api_key}"
-    data = _get_json(url)
-    if isinstance(data, list) and data:
-        so = data[0].get("outstandingShares")
         if so and so > 0:
             return int(so)
 
