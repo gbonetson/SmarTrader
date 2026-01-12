@@ -6,7 +6,7 @@ from data_fetch import fetch_option_exp, fetch_option_chain, fetch_ticker_info
 from analytics import black_scholes
 
 def render_options_workstation():
-    st.subheader("🧮 Options Workstation")
+    st.subheader("Options Workstation")
 
     ticker = st.text_input("Ticker", value="AAPL").upper()
 

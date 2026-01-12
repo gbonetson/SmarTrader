@@ -188,7 +188,7 @@ def render_equity_terminal():
             fig.add_trace(go.Scatter(
                 x=df.index,
                 y=df["EMA20"],
-                line=dict(color="deeps  yblue", width=1.5),
+                line=dict(color="blue", width=1.5),
                 name="EMA 20"
             ))
 
