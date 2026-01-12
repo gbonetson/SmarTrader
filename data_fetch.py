@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+import requests
 import os
 from balance_sheet import extract_filings
 
@@ -28,26 +29,33 @@ def fetch_ticker_info(ticker: str) -> dict:
     except Exception as e:
         return {"error": str(e)}
 
-def fetch_price_history(ticker: str, period="6mo", interval="1d") -> pd.DataFrame:
-    """
-    Descarga el historial de precios.
-    """
-    df = yf.download(ticker, period=period, interval=interval)
-    if df.empty:
-        raise ValueError("DataFrame vacío. Verificá el ticker.")
 
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
+def fetch_price_history(ticker, period="1y", interval="1d"):
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0",
+        "Accept-Language": "en-US,en;q=0.9"
+    })
 
-    # Forzar columnas a tipo numérico
-    for col in ["Open", "High", "Low", "Close"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    try:
+        t = yf.Ticker(ticker, session=session)
+        df = t.history(
+            period=period,
+            interval=interval,
+            auto_adjust=False
+        )
+    except Exception as e:
+        return pd.DataFrame()
 
-    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
-    df.index = pd.to_datetime(df.index)
+    if df is None or df.empty:
+        return pd.DataFrame()
 
+    REQUIRED = {"Open", "High", "Low", "Close", "Volume"}
+    if not REQUIRED.issubset(df.columns):
+        return pd.DataFrame()
 
-    return df
+    return df.reset_index()
+
 
 
 def fetch_balance_path(ticker: str) -> str:
