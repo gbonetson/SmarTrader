@@ -1,8 +1,18 @@
 import yfinance as yf
 import pandas as pd
 import requests
+import streamlit as st
+import time
 import os
+from datetime import datetime, timedelta
 from balance_sheet import extract_filings
+
+FINNHUB_API_KEY = st.secrets.get(
+    "FINNHUB_API_KEY",
+    os.getenv("FINNHUB_API_KEY")
+)
+
+BASE_URL = "https://finnhub.io/api/v1/stock/candle"
 
 def fetch_ticker_info(ticker: str) -> dict:
     """
@@ -29,33 +39,76 @@ def fetch_ticker_info(ticker: str) -> dict:
     except Exception as e:
         return {"error": str(e)}
 
+def fetch_price_history(
+    ticker: str,
+    period: str = "1y",
+    interval: str = "1d"
+) -> pd.DataFrame:
+    """
+    Fetch OHLCV data from Finnhub.
+    Returns empty DataFrame if anything fails.
+    """
 
-def fetch_price_history(ticker, period="1y", interval="1d"):
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0",
-        "Accept-Language": "en-US,en;q=0.9"
-    })
+    if FINNHUB_API_KEY is None:
+        return pd.DataFrame()
+
+    # ---- interval mapping ----
+    interval_map = {
+        "1m": 1,
+        "5m": 5,
+        "15m": 15,
+        "30m": 30,
+        "1h": 60,
+        "1d": "D"
+    }
+
+    if interval not in interval_map:
+        return pd.DataFrame()
+
+    # ---- period → timestamps ----
+    now = int(time.time())
+
+    period_map = {
+        "5d": 5,
+        "1mo": 30,
+        "3mo": 90,
+        "6mo": 180,
+        "1y": 365,
+        "max": 365 * 20
+    }
+
+    days = period_map.get(period, 365)
+    start = int((datetime.utcnow() - timedelta(days=days)).timestamp())
+
+    params = {
+        "symbol": ticker.upper(),
+        "resolution": interval_map[interval],
+        "from": start,
+        "to": now,
+        "token": FINNHUB_API_KEY
+    }
 
     try:
-        t = yf.Ticker(ticker, session=session)
-        df = t.history(
-            period=period,
-            interval=interval,
-            auto_adjust=False
-        )
-    except Exception as e:
+        r = requests.get(BASE_URL, params=params, timeout=10)
+        data = r.json()
+    except Exception:
         return pd.DataFrame()
 
-    if df is None or df.empty:
+    # Finnhub error handling
+    if data.get("s") != "ok":
         return pd.DataFrame()
 
-    REQUIRED = {"Open", "High", "Low", "Close", "Volume"}
-    if not REQUIRED.issubset(df.columns):
-        return pd.DataFrame()
+    df = pd.DataFrame({
+        "Datetime": pd.to_datetime(data["t"], unit="s"),
+        "Open": data["o"],
+        "High": data["h"],
+        "Low": data["l"],
+        "Close": data["c"],
+        "Volume": data["v"],
+    })
 
-    return df.reset_index()
-
+    df.set_index("Datetime", inplace=True)
+    return df
 
 
 def fetch_balance_path(ticker: str) -> str:
