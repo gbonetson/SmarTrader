@@ -1,6 +1,7 @@
 streamlit
 plotly
 pandas
+requests
 numpy
 yfinance==0.2.36
 scipy
